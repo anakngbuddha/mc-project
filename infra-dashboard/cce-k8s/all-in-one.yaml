@@ -1,0 +1,231 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: infra-dashboard
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dashboard-secrets
+  namespace: infra-dashboard
+type: Opaque
+stringData:
+  DATABASE_URL: "postgresql://postgres:postgrespassword@postgres-service:5432/infradb?schema=public"
+  ENCRYPTION_KEY: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+---
+# -------------------- POSTGRESQL DB (Stateful) --------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgres
+  namespace: infra-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: postgres
+  template:
+    metadata:
+      labels:
+        app: postgres
+    spec:
+      containers:
+        - name: postgres
+          image: postgres:15-alpine
+          env:
+            - name: POSTGRES_DB
+              value: infradb
+            - name: POSTGRES_USER
+              value: postgres
+            - name: POSTGRES_PASSWORD
+              value: postgrespassword
+          ports:
+            - containerPort: 5432
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-service
+  namespace: infra-dashboard
+spec:
+  selector:
+    app: postgres
+  ports:
+    - port: 5432
+      targetPort: 5432
+---
+# -------------------- NOTIFIER SERVICE --------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notifier
+  namespace: infra-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: notifier
+  template:
+    metadata:
+      labels:
+        app: notifier
+    spec:
+      containers:
+        - name: notifier
+          image: <YOUR_DOCKERHUB_USERNAME>/infra-notifier:latest
+          ports:
+            - containerPort: 5050
+          env:
+            - name: PORT
+              value: "5050"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: notifier-service
+  namespace: infra-dashboard
+spec:
+  selector:
+    app: notifier
+  ports:
+    - port: 5050
+      targetPort: 5050
+---
+# -------------------- HISTORY SERVICE --------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: history-service
+  namespace: infra-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: history-service
+  template:
+    metadata:
+      labels:
+        app: history-service
+    spec:
+      containers:
+        - name: history-service
+          image: <YOUR_DOCKERHUB_USERNAME>/infra-history-service:latest
+          ports:
+            - containerPort: 4000
+          envFrom:
+            - secretRef:
+                name: dashboard-secrets
+          env:
+            - name: PORT
+              value: "4000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: history-service
+  namespace: infra-dashboard
+spec:
+  selector:
+    app: history-service
+  ports:
+    - port: 4000
+      targetPort: 4000
+---
+# -------------------- ALERT SERVICE --------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alert-service
+  namespace: infra-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: alert-service
+  template:
+    metadata:
+      labels:
+        app: alert-service
+    spec:
+      containers:
+        - name: alert-service
+          image: <YOUR_DOCKERHUB_USERNAME>/infra-alert-service:latest
+          ports:
+            - containerPort: 5000
+          env:
+            - name: NOTIFIER_URL
+              value: "http://notifier-service:5050/notify"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: alert-service
+  namespace: infra-dashboard
+spec:
+  selector:
+    app: alert-service
+  ports:
+    - port: 5000
+      targetPort: 5000
+---
+# -------------------- COLLECTOR SERVICE --------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: collector-service
+  namespace: infra-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: collector-service
+  template:
+    metadata:
+      labels:
+        app: collector-service
+    spec:
+      containers:
+        - name: collector-service
+          image: <YOUR_DOCKERHUB_USERNAME>/infra-collector-service:latest
+          env:
+            - name: HISTORY_SERVICE_BASE
+              value: "http://history-service:4000"
+            - name: ALERT_SERVICE_URL
+              value: "http://alert-service:5000/metrics"
+            - name: POLL_INTERVAL_SECONDS
+              value: "15"
+---
+# -------------------- FRONTEND (UI) --------------------
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend
+  namespace: infra-dashboard
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: <YOUR_DOCKERHUB_USERNAME>/infra-frontend:latest
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+  namespace: infra-dashboard
+spec:
+  type: LoadBalancer # CCE automatically provisions a public EIP for this service
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80
