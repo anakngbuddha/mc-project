@@ -20,9 +20,5 @@
   "18": "postcss.config.js",
   "19": "tailwind.config.js",
   "20": "vite.config.ts",
-  "21": "collector-service",
-  "22": "huawei.go",
-  "23": "hwSign",
-  "24": "types.go",
-  "25": "build-and-push.sh"
+  "21": "collector-service"
 }

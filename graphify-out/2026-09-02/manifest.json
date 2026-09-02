@@ -1,17 +1,17 @@
 {
   "infra-dashboard/services/alert-service/main.py": {
-    "mtime": 1787884307.1520114,
-    "ast_hash": "d8a303e59f23479d0e637aea5ec8d49e",
+    "mtime": 1787882153.8499062,
+    "ast_hash": "c4f72964f24157c578502d8d1aa112e7",
     "semantic_hash": ""
   },
   "infra-dashboard/services/collector-service/go.mod": {
-    "mtime": 1788314274.9095879,
+    "mtime": 1787882152.14064,
     "ast_hash": "4237e1746f775c74d7b6990fd1c8c957",
     "semantic_hash": ""
   },
   "infra-dashboard/services/collector-service/main.go": {
-    "mtime": 1788313883.8282814,
-    "ast_hash": "5076e63577e71df7bc155f171250df13",
+    "mtime": 1787882152.1906693,
+    "ast_hash": "32fe07401ec7702d655a0e4c34fa17fa",
     "semantic_hash": ""
   },
   "infra-dashboard/services/frontend/.oxlintrc.json": {
@@ -30,8 +30,8 @@
     "semantic_hash": ""
   },
   "infra-dashboard/services/frontend/src/App.tsx": {
-    "mtime": 1788316732.972984,
-    "ast_hash": "9918676fec5c6385b48fe35180a67e65",
+    "mtime": 1787882153.225005,
+    "ast_hash": "a60ad0bea1c88302b8c474b46ce28b09",
     "semantic_hash": ""
   },
   "infra-dashboard/services/frontend/src/main.tsx": {
@@ -80,8 +80,8 @@
     "semantic_hash": ""
   },
   "infra-dashboard/services/history-service/src/index.ts": {
-    "mtime": 1787885319.718444,
-    "ast_hash": "aa45872f16745fdd6ac0508d624f1823",
+    "mtime": 1787882152.4695394,
+    "ast_hash": "5849bfa37451dbde579d815b4bc8b4e2",
     "semantic_hash": ""
   },
   "infra-dashboard/services/history-service/tsconfig.json": {
@@ -137,61 +137,6 @@
   "infra-dashboard/services/frontend/src/assets/vite.svg": {
     "mtime": 1787882153.471193,
     "ast_hash": "9960a24288958394ac50e57ff638b036",
-    "semantic_hash": ""
-  },
-  "infra-dashboard/build-and-push.sh": {
-    "mtime": 1787885643.511666,
-    "ast_hash": "96e7e24a1e443777422bbea8d4cacdf7",
-    "semantic_hash": ""
-  },
-  "infra-dashboard/services/collector-service/providers/aws.go": {
-    "mtime": 1787885373.8014395,
-    "ast_hash": "948e5c6dea4f7c2b950ed756a9ecd454",
-    "semantic_hash": ""
-  },
-  "infra-dashboard/services/collector-service/providers/azure.go": {
-    "mtime": 1787885378.1731677,
-    "ast_hash": "909ae073ab1c335b7ae521bd1f92fec5",
-    "semantic_hash": ""
-  },
-  "infra-dashboard/services/collector-service/providers/huawei.go": {
-    "mtime": 1788317775.0885909,
-    "ast_hash": "cf2c8581a448df990fdf0a3d6706e7b0",
-    "semantic_hash": ""
-  },
-  "infra-dashboard/services/collector-service/providers/huawei_sign.go": {
-    "mtime": 1788317253.468687,
-    "ast_hash": "77977ad04d87669847067e3fc7635383",
-    "semantic_hash": ""
-  },
-  "infra-dashboard/services/collector-service/providers/huawei_sign_test.go": {
-    "mtime": 1788317158.2401204,
-    "ast_hash": "b00e596e96be38cb6200ec97fbf42b15",
-    "semantic_hash": ""
-  },
-  "infra-dashboard/services/collector-service/providers/types.go": {
-    "mtime": 1787885364.8695128,
-    "ast_hash": "88cd0e7efbad564bf97e0dc91e111750",
-    "semantic_hash": ""
-  },
-  "infra-dashboard/services/frontend/src/components/CloudAccountsModal.tsx": {
-    "mtime": 1788316744.025324,
-    "ast_hash": "4110942293b99c9b8392d9bd7681d4a8",
-    "semantic_hash": ""
-  },
-  "infra-dashboard/services/history-service/src/crypto.ts": {
-    "mtime": 1787885308.9574475,
-    "ast_hash": "ede14d72149f1f4c95a894c6508b0c73",
-    "semantic_hash": ""
-  },
-  "infra-dashboard/DEPLOYMENT_GUIDE.md": {
-    "mtime": 1788231891.430311,
-    "ast_hash": "c0bb7f27a27279ec7ef9f4e69894e7af",
-    "semantic_hash": ""
-  },
-  "infra-dashboard/cce-k8s/all-in-one.yaml": {
-    "mtime": 1787885638.5067647,
-    "ast_hash": "c3f9061f7eed810c3099e28d14c9ea4d",
     "semantic_hash": ""
   }
 }

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"math/rand"
 	"net/http"
 	"os"
 	"strconv"
@@ -16,43 +15,6 @@ import (
 
 type Metric = providers.Metric
 type CloudAccount = providers.CloudAccount
-
-type mockResource struct {
-	id   string
-	typ  string
-	prov string
-}
-
-var mockResources = []mockResource{
-	{id: "ecs-web-01", typ: "ecs", prov: "huawei"},
-	{id: "ecs-db-01", typ: "ecs", prov: "huawei"},
-	{id: "vm-app-01", typ: "vm", prov: "azure"},
-}
-
-func collectMock() []Metric {
-	metrics := make([]Metric, 0, len(mockResources)*2)
-	for _, r := range mockResources {
-		cpu := 20 + rand.Float64()*40
-		if rand.Float64() < 0.15 {
-			cpu = 80 + rand.Float64()*20
-		}
-		metrics = append(metrics, Metric{
-			ResourceID: r.id, ResourceType: r.typ, Provider: r.prov,
-			MetricName: "cpu_percent", Value: round2(cpu), Unit: "percent",
-		})
-
-		mem := 30 + rand.Float64()*50
-		metrics = append(metrics, Metric{
-			ResourceID: r.id, ResourceType: r.typ, Provider: r.prov,
-			MetricName: "memory_percent", Value: round2(mem), Unit: "percent",
-		})
-	}
-	return metrics
-}
-
-func round2(v float64) float64 {
-	return float64(int(v*100)) / 100
-}
 
 func postJSON(url string, payload any) error {
 	body, err := json.Marshal(payload)
@@ -129,12 +91,9 @@ func run() {
 		var metrics []Metric
 
 		if err != nil {
-			log.Printf("[warning] Failed to fetch cloud accounts from history-service: %v (falling back to mock)", err)
-			metrics = collectMock()
+			log.Printf("[warning] Failed to fetch cloud accounts from history-service: %v", err)
 		} else if len(accounts) == 0 {
-			// No accounts registered in UI -> fallback to synthetic mock data
-			log.Printf("[info] No active cloud accounts configured in UI. Running mock generator.")
-			metrics = collectMock()
+			log.Printf("[info] No active cloud accounts configured. Add an account via the UI to start collecting real metrics.")
 		} else {
 			log.Printf("[info] Polling metrics for %d active cloud account(s)", len(accounts))
 			for _, acc := range accounts {

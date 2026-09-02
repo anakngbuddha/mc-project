@@ -1,18 +1,18 @@
 {
   "services/alert-service/main.py": {
-    "mtime": 1787882153.8499062,
-    "ast_hash": "c4f72964f24157c578502d8d1aa112e7",
-    "semantic_hash": "c4f72964f24157c578502d8d1aa112e7"
+    "mtime": 1787884307.1520114,
+    "ast_hash": "d8a303e59f23479d0e637aea5ec8d49e",
+    "semantic_hash": "d8a303e59f23479d0e637aea5ec8d49e"
   },
   "services/collector-service/go.mod": {
-    "mtime": 1787882152.14064,
+    "mtime": 1788314274.9095879,
     "ast_hash": "4237e1746f775c74d7b6990fd1c8c957",
     "semantic_hash": "4237e1746f775c74d7b6990fd1c8c957"
   },
   "services/collector-service/main.go": {
-    "mtime": 1787882152.1906693,
-    "ast_hash": "32fe07401ec7702d655a0e4c34fa17fa",
-    "semantic_hash": "32fe07401ec7702d655a0e4c34fa17fa"
+    "mtime": 1788313883.8282814,
+    "ast_hash": "5076e63577e71df7bc155f171250df13",
+    "semantic_hash": "5076e63577e71df7bc155f171250df13"
   },
   "services/frontend/.oxlintrc.json": {
     "mtime": 1787882153.0708044,
@@ -30,9 +30,9 @@
     "semantic_hash": "ef3ba2a81ba19f8ea5ddf625521e96f0"
   },
   "services/frontend/src/App.tsx": {
-    "mtime": 1787882153.225005,
-    "ast_hash": "a60ad0bea1c88302b8c474b46ce28b09",
-    "semantic_hash": "a60ad0bea1c88302b8c474b46ce28b09"
+    "mtime": 1787885422.4346735,
+    "ast_hash": "100b90fe3666da430ca9e9e2800f7276",
+    "semantic_hash": "100b90fe3666da430ca9e9e2800f7276"
   },
   "services/frontend/src/main.tsx": {
     "mtime": 1787882153.3497667,
@@ -80,9 +80,9 @@
     "semantic_hash": "793bbc383e90ee28cb9f718641eef2c0"
   },
   "services/history-service/src/index.ts": {
-    "mtime": 1787882152.4695394,
-    "ast_hash": "5849bfa37451dbde579d815b4bc8b4e2",
-    "semantic_hash": "5849bfa37451dbde579d815b4bc8b4e2"
+    "mtime": 1787885319.718444,
+    "ast_hash": "aa45872f16745fdd6ac0508d624f1823",
+    "semantic_hash": "aa45872f16745fdd6ac0508d624f1823"
   },
   "services/history-service/tsconfig.json": {
     "mtime": 1787882152.3417168,
@@ -138,5 +138,60 @@
     "mtime": 1787882153.471193,
     "ast_hash": "9960a24288958394ac50e57ff638b036",
     "semantic_hash": "9960a24288958394ac50e57ff638b036"
+  },
+  "build-and-push.sh": {
+    "mtime": 1787885643.511666,
+    "ast_hash": "96e7e24a1e443777422bbea8d4cacdf7",
+    "semantic_hash": "96e7e24a1e443777422bbea8d4cacdf7"
+  },
+  "services/collector-service/providers/aws.go": {
+    "mtime": 1787885373.8014395,
+    "ast_hash": "948e5c6dea4f7c2b950ed756a9ecd454",
+    "semantic_hash": "948e5c6dea4f7c2b950ed756a9ecd454"
+  },
+  "services/collector-service/providers/azure.go": {
+    "mtime": 1787885378.1731677,
+    "ast_hash": "909ae073ab1c335b7ae521bd1f92fec5",
+    "semantic_hash": "909ae073ab1c335b7ae521bd1f92fec5"
+  },
+  "services/collector-service/providers/huawei.go": {
+    "mtime": 1788315511.6501715,
+    "ast_hash": "f7b98c5d567e388ce32828065ef84c3f",
+    "semantic_hash": "f7b98c5d567e388ce32828065ef84c3f"
+  },
+  "services/collector-service/providers/huawei_sign.go": {
+    "mtime": 1788315503.5338254,
+    "ast_hash": "516059682aeba5607f58dbe992526bf9",
+    "semantic_hash": "516059682aeba5607f58dbe992526bf9"
+  },
+  "services/collector-service/providers/huawei_sign_test.go": {
+    "mtime": 1788315519.2874744,
+    "ast_hash": "b51db7c993fc582a5b0f48d5e7386e4d",
+    "semantic_hash": "b51db7c993fc582a5b0f48d5e7386e4d"
+  },
+  "services/collector-service/providers/types.go": {
+    "mtime": 1787885364.8695128,
+    "ast_hash": "88cd0e7efbad564bf97e0dc91e111750",
+    "semantic_hash": "88cd0e7efbad564bf97e0dc91e111750"
+  },
+  "services/frontend/src/components/CloudAccountsModal.tsx": {
+    "mtime": 1788242196.8546119,
+    "ast_hash": "6ab65d26d56ae1fe652c726f45925e82",
+    "semantic_hash": "6ab65d26d56ae1fe652c726f45925e82"
+  },
+  "services/history-service/src/crypto.ts": {
+    "mtime": 1787885308.9574475,
+    "ast_hash": "ede14d72149f1f4c95a894c6508b0c73",
+    "semantic_hash": "ede14d72149f1f4c95a894c6508b0c73"
+  },
+  "DEPLOYMENT_GUIDE.md": {
+    "mtime": 1788231891.430311,
+    "ast_hash": "c0bb7f27a27279ec7ef9f4e69894e7af",
+    "semantic_hash": "c0bb7f27a27279ec7ef9f4e69894e7af"
+  },
+  "cce-k8s/all-in-one.yaml": {
+    "mtime": 1787885638.5067647,
+    "ast_hash": "c3f9061f7eed810c3099e28d14c9ea4d",
+    "semantic_hash": "c3f9061f7eed810c3099e28d14c9ea4d"
   }
 }

@@ -29,6 +29,13 @@ type Alert = {
   triggeredAt: string;
 };
 
+function formatMetricValue(value: number, unit?: string | null): string {
+  const formattedNum = Number.isInteger(value) ? value.toString() : value.toFixed(2);
+  if (!unit) return formattedNum;
+  if (unit === "percent" || unit === "%") return `${formattedNum}%`;
+  return `${formattedNum} ${unit}`;
+}
+
 function App() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [metrics, setMetrics] = useState<Metric[]>([]);
@@ -141,9 +148,8 @@ function App() {
                 <span>
                   {m.resourceId} · {m.metricName}
                 </span>
-                <span className="text-slate-400">
-                  {m.value}
-                  {m.unit ?? ""}
+                <span className="text-slate-400 font-mono">
+                  {formatMetricValue(m.value, m.unit)}
                 </span>
               </li>
             ))}

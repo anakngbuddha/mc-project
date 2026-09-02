@@ -108,7 +108,7 @@ infra-dashboard/
 Make the build script executable and run it with your Docker Hub username:
 ```bash
 chmod +x build-and-push.sh
-./build-and-push.sh <YOUR_DOCKERHUB_USERNAME>
+./build-and-push.sh markvalerio4992
 ```
 
 *(This automatically builds and pushes the 5 container images: `infra-history-service`, `infra-alert-service`, `infra-notifier`, `infra-collector-service`, and `infra-frontend`).*

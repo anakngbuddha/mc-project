@@ -72,7 +72,7 @@ export default function CloudAccountsModal({ isOpen, onClose, onAccountsUpdated 
         setError("Please fill in Name, AK, SK, and Project ID.");
         return;
       }
-      credentials = { ak, sk, projectId, region: region || "cn-north-4" };
+      credentials = { ak, sk, region: region || "ap-southeast-3", projectId: projectId.trim() };
     } else if (provider === "aws") {
       if (!name || !ak || !sk) {
         setError("Please fill in Name, Access Key ID, and Secret Access Key.");
@@ -205,7 +205,7 @@ export default function CloudAccountsModal({ isOpen, onClose, onAccountsUpdated 
                     </span>
                   </div>
                   <div className="text-xs text-slate-400 mt-1 font-mono">
-                    {acc.provider === "huawei" && `AK: ${acc.config.ak || "—"} | Project: ${acc.config.projectId || "—"}`}
+                    {acc.provider === "huawei" && `AK: ${acc.config.ak || "—"} | Region: ${acc.config.region || "—"}`}
                     {acc.provider === "aws" && `AK: ${acc.config.ak || "—"} | Region: ${acc.config.region || "—"}`}
                     {acc.provider === "azure" && `Tenant: ${acc.config.tenantId || "—"} | ClientID: ${acc.config.clientId || "—"}`}
                   </div>
@@ -292,22 +292,22 @@ export default function CloudAccountsModal({ isOpen, onClose, onAccountsUpdated 
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="block text-slate-400 mb-1">Project ID</label>
-                    <input
-                      type="text"
-                      value={projectId}
-                      onChange={(e) => setProjectId(e.target.value)}
-                      placeholder="e.g. 04b98c..."
-                      className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-slate-400 mb-1">Region</label>
+                    <label className="block text-slate-400 mb-1">Region <span className="text-indigo-400">(required)</span></label>
                     <input
                       type="text"
                       value={region}
                       onChange={(e) => setRegion(e.target.value)}
-                      placeholder="cn-north-4 / ap-southeast-3"
+                      placeholder="ap-southeast-3"
+                      className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-400 mb-1">Project ID <span className="text-indigo-400">(required)</span></label>
+                    <input
+                      type="text"
+                      value={projectId}
+                      onChange={(e) => setProjectId(e.target.value)}
+                      placeholder="e.g. 0b964be422954c0d804cd683debbed07"
                       className="w-full bg-slate-900 border border-slate-700 rounded px-3 py-2 text-slate-100 focus:outline-none focus:border-indigo-500"
                     />
                   </div>
