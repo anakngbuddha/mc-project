@@ -5,8 +5,12 @@ import { Resource, Metric, Alert, Rule, CloudAccount } from "../types";
 const STORAGE_KEY_HISTORY = "@infra_history_url";
 const STORAGE_KEY_ALERT = "@infra_alert_url";
 
-// Default localhost handling: Android emulator uses 10.0.2.2, iOS simulator uses localhost
-const DEFAULT_HOST = Platform.OS === "android" ? "http://10.0.2.2" : "http://localhost";
+// For physical device (Expo Go on real phone), use the host machine's LAN IP.
+// 10.0.2.2 only works inside Android EMULATOR — it will FAIL on a real phone.
+// iOS Simulator uses localhost. Physical phone needs the machine's Wi-Fi IP.
+const LAN_IP = "172.16.86.184"; // ← your machine's local IP (run `ipconfig` to verify)
+const DEFAULT_HOST =
+  Platform.OS === "ios" ? "http://localhost" : `http://${LAN_IP}`;
 const DEFAULT_HISTORY_URL = `${DEFAULT_HOST}:4000`;
 const DEFAULT_ALERT_URL = `${DEFAULT_HOST}:5000`;
 
@@ -111,7 +115,10 @@ export async function pingHealth() {
 
   const t0 = Date.now();
   try {
-    const resp = await fetch(`${cachedHistoryUrl}/health`, { signal: AbortSignal.timeout(3000) });
+    const ctrl0 = new AbortController();
+    const timer0 = setTimeout(() => ctrl0.abort(), 3000);
+    const resp = await fetch(`${cachedHistoryUrl}/health`, { signal: ctrl0.signal });
+    clearTimeout(timer0);
     if (resp.ok) {
       results.historyOk = true;
       results.historyLatency = Date.now() - t0;
@@ -120,7 +127,10 @@ export async function pingHealth() {
 
   const t1 = Date.now();
   try {
-    const resp = await fetch(`${cachedAlertUrl}/health`, { signal: AbortSignal.timeout(3000) });
+    const ctrl1 = new AbortController();
+    const timer1 = setTimeout(() => ctrl1.abort(), 3000);
+    const resp = await fetch(`${cachedAlertUrl}/health`, { signal: ctrl1.signal });
+    clearTimeout(timer1);
     if (resp.ok) {
       results.alertOk = true;
       results.alertLatency = Date.now() - t1;
