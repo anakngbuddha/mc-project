@@ -1,12 +1,12 @@
 # Graph Report - mc-project  (2026-09-02)
 
 ## Corpus Check
-- 33 files · ~9,461 words
+- 52 files · ~19,854 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 316 nodes · 339 edges · 26 communities (21 shown, 5 thin omitted)
-- Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 8 edges (avg confidence: 0.8)
+- 463 nodes · 569 edges · 32 communities (27 shown, 5 thin omitted)
+- Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 8 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
 ## Community Hubs (Navigation)
@@ -33,18 +33,23 @@
 - hwSign
 - types.go
 - build-and-push.sh
+- dependencies
+- package.json
+- expo
+- plugins
+- tsconfig.json
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 18 edges
 2. `compilerOptions` - 15 edges
-3. `hwSign()` - 11 edges
-4. `compilerOptions` - 10 edges
-5. `compilerOptions` - 10 edges
-6. `Complete End-to-End Deployment Guide: Azure VM to Huawei Cloud CCE` - 10 edges
-7. `run()` - 8 edges
-8. `fetchCESMetrics()` - 7 edges
-9. `CollectHuawei()` - 6 edges
-10. `listECSServers()` - 6 edges
+3. `react` - 14 edges
+4. `hwSign()` - 11 edges
+5. `expo` - 11 edges
+6. `compilerOptions` - 10 edges
+7. `compilerOptions` - 10 edges
+8. `Complete End-to-End Deployment Guide: Azure VM to Huawei Cloud CCE` - 10 edges
+9. `run()` - 8 edges
+10. `fetchCESMetrics()` - 7 edges
 
 ## Surprising Connections (you probably didn't know these)
 - `run()` --calls--> `CollectHuawei()`  [INFERRED]
@@ -61,7 +66,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (26 total, 5 thin omitted)
+## Communities (32 total, 5 thin omitted)
 
 ### Community 0 - "compilerOptions"
 Cohesion: 0.08
@@ -76,16 +81,16 @@ Cohesion: 0.10
 Nodes (19): compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, lib, module, moduleDetection, noEmit, noFallthroughCasesInSwitch (+11 more)
 
 ### Community 3 - "package.json"
-Cohesion: 0.10
-Nodes (19): dependencies, cors, express, @prisma/client, zod, cors, express, name (+11 more)
+Cohesion: 0.06
+Nodes (32): dependencies, cors, express, @prisma/client, zod, devDependencies, prisma, tsx (+24 more)
 
 ### Community 4 - "package.json"
-Cohesion: 0.12
-Nodes (16): dependencies, react, react-dom, recharts, name, private, scripts, build (+8 more)
+Cohesion: 0.11
+Nodes (18): dependencies, lucide-react, react, react-dom, recharts, react, name, private (+10 more)
 
 ### Community 5 - "App.tsx"
-Cohesion: 0.11
-Nodes (16): plugins, rules, react/only-export-components, react/rules-of-hooks, $schema, Alert, App(), formatMetricValue() (+8 more)
+Cohesion: 0.10
+Nodes (20): Metric, Resource, Alert, AlertCenter(), formatOperator(), Props, Rule, CloudAccount (+12 more)
 
 ### Community 6 - "main.py"
 Cohesion: 0.23
@@ -96,8 +101,8 @@ Cohesion: 0.08
 Nodes (24): dependencies, cors, express, devDependencies, tsx, @types/cors, @types/express, @types/node (+16 more)
 
 ### Community 8 - "devDependencies"
-Cohesion: 0.15
-Nodes (13): devDependencies, prisma, tsx, @types/cors, @types/express, @types/node, typescript, tsx (+5 more)
+Cohesion: 0.06
+Nodes (54): App(), styles, Tab, AlertItem(), formatOperator(), Props, styles, Header() (+46 more)
 
 ### Community 9 - "compilerOptions"
 Cohesion: 0.15
@@ -108,8 +113,8 @@ Cohesion: 0.15
 Nodes (12): compilerOptions, esModuleInterop, forceConsistentCasingInFileNames, module, moduleResolution, outDir, rootDir, skipLibCheck (+4 more)
 
 ### Community 11 - "Run order"
-Cohesion: 0.18
-Nodes (10): 1. history-service, 2. notifier, 3. alert-service, 4. collector-service, 5. frontend, Personal Infra Dashboard — Local-only phase, Ports, Run order (+2 more)
+Cohesion: 0.17
+Nodes (11): 1. history-service, 2. notifier, 3. alert-service, 4. collector-service, 5. frontend (Enterprise Web Dashboard), 6. mobile (React Native / Expo Go), Personal Infra Dashboard — Local-only phase, Ports (+3 more)
 
 ### Community 12 - "devDependencies"
 Cohesion: 0.06
@@ -135,24 +140,44 @@ Nodes (13): Client, cesMetricToStd(), CollectHuawei(), fetchCESMetrics(), CloudA
 Cohesion: 0.31
 Nodes (11): canonicalURI(), escapeRFC3986(), getHeader(), hexSHA256(), hmacSHA256(), hwSign(), TestCanonicalURI(), TestHWSign() (+3 more)
 
+### Community 26 - "dependencies"
+Cohesion: 0.10
+Nodes (21): expo, expo-haptics, expo-status-bar, dependencies, expo, expo-haptics, expo-status-bar, lucide-react-native (+13 more)
+
+### Community 27 - "package.json"
+Cohesion: 0.11
+Nodes (17): @babel/core, devDependencies, @babel/core, @types/react, typescript, @types/react, typescript, main (+9 more)
+
+### Community 28 - "expo"
+Cohesion: 0.12
+Nodes (16): backgroundColor, adaptiveIcon, expo, android, icon, ios, name, orientation (+8 more)
+
+### Community 29 - "plugins"
+Cohesion: 0.22
+Nodes (8): plugins, rules, react/only-export-components, react/rules-of-hooks, $schema, oxc, typescript, warn
+
+### Community 30 - "tsconfig.json"
+Cohesion: 0.40
+Nodes (4): compilerOptions, strict, extends, expo/tsconfig.base
+
 ## Knowledge Gaps
-- **163 isolated node(s):** `build-and-push.sh script`, `collector-service`, `cesResponse`, `Metric`, `CloudAccount` (+158 more)
+- **224 isolated node(s):** `build-and-push.sh script`, `collector-service`, `cesResponse`, `Metric`, `CloudAccount` (+219 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **5 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
+- **Why does `react` connect `devDependencies` to `App.tsx`, `plugins`?**
+  _High betweenness centrality (0.027) - this node is a cross-community bridge._
+- **Why does `plugins` connect `plugins` to `devDependencies`?**
+  _High betweenness centrality (0.007) - this node is a cross-community bridge._
 - **Why does `devDependencies` connect `devDependencies` to `package.json`?**
-  _High betweenness centrality (0.011) - this node is a cross-community bridge._
-- **Why does `run()` connect `main.go` to `huawei.go`?**
-  _High betweenness centrality (0.009) - this node is a cross-community bridge._
-- **Why does `CollectHuawei()` connect `huawei.go` to `main.go`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `hwSign()` (e.g. with `fetchCESMetrics()` and `listECSServers()`) actually correct?**
   _`hwSign()` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `build-and-push.sh script`, `collector-service`, `cesResponse` to the rest of the system?**
-  _163 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _224 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `compilerOptions` be split into smaller, more focused modules?**
   _Cohesion score 0.08333333333333333 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**

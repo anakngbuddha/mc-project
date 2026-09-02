@@ -24,5 +24,11 @@
   "22": "huawei.go",
   "23": "hwSign",
   "24": "types.go",
-  "25": "build-and-push.sh"
+  "25": "build-and-push.sh",
+  "26": "dependencies",
+  "27": "package.json",
+  "28": "expo",
+  "29": "plugins",
+  "30": "tsconfig.json",
+  "31": "index.ts"
 }

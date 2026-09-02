@@ -61,7 +61,7 @@ cd services/collector-service
 go run main.go              # starts posting mock metrics every 10s
 ```
 
-### 5. frontend
+### 5. frontend (Enterprise Web Dashboard)
 
 ```bash
 cd services/frontend
@@ -69,23 +69,34 @@ npm install
 npm run dev                 # http://localhost:5173
 ```
 
+### 6. mobile (React Native / Expo Go)
+
+```bash
+cd services/mobile
+npm install
+npm start                   # or npx expo start
+```
+
+- **In Expo Go on physical device (iOS/Android)**: Scan the QR code in the terminal. In the app's **Settings (⚙️)** tab, configure the target History/Alert service URL to your PC's local Wi-Fi IP (e.g. `http://192.168.1.50:4000`).
+- **In Emulator / Simulator**: Press `a` for Android or `i` for iOS simulator.
+
 ## Sanity checks
 
 - `curl http://localhost:4000/health` → history-service
 - `curl http://localhost:5000/health` → alert-service
 - `curl http://localhost:5050/health` → notifier
 - After collector-service has run for ~10s: `curl http://localhost:4000/metrics`
-  should return synthetic metric rows
-- Open `http://localhost:5173` — resources, recent metrics, and any
-  triggered alerts (CPU rule fires above 80%) should appear and refresh
-  every 5s
+  should return synthetic or live cloud metric rows
+- Open `http://localhost:5173` — Enterprise Command Center with resource cards, gauges, and sparkline trends
+- Open Expo Go on mobile — real-time mobile telemetry feed, incident alerts, and cloud account management
 
 ## Ports
 
-| Service | Port |
-|---|---|
-| history-service | 4000 |
-| alert-service | 5000 |
-| notifier | 5050 |
-| frontend | 5173 |
-| collector-service | — (no HTTP server, just posts out) |
+| Service | Port | Description |
+|---|---|---|
+| history-service | 4000 | Ingest, metric history & AES-256 encrypted cloud accounts |
+| alert-service | 5000 | Real-time threshold evaluation & notifier dispatch |
+| notifier | 5050 | Webhook / Slack notification dispatcher |
+| frontend | 5173 | Enterprise Web Telemetry Dashboard (Vite + React) |
+| mobile | 8081 | Expo Go Metro Bundler (React Native iOS & Android) |
+| collector-service | — | Polling agent for Huawei Cloud CES / AWS / Azure |

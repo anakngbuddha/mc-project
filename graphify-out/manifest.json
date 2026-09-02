@@ -20,8 +20,8 @@
     "semantic_hash": ""
   },
   "infra-dashboard/services/frontend/package.json": {
-    "mtime": 1787882153.0233002,
-    "ast_hash": "79a775ad5cdc418a01f77920b075f320",
+    "mtime": 1788318621.3413267,
+    "ast_hash": "83a122953b151b18d5ba432814b7e7d8",
     "semantic_hash": ""
   },
   "infra-dashboard/services/frontend/postcss.config.js": {
@@ -30,8 +30,8 @@
     "semantic_hash": ""
   },
   "infra-dashboard/services/frontend/src/App.tsx": {
-    "mtime": 1788316732.972984,
-    "ast_hash": "9918676fec5c6385b48fe35180a67e65",
+    "mtime": 1788318621.355332,
+    "ast_hash": "cb3ca02f87113900a72459d36730c0bd",
     "semantic_hash": ""
   },
   "infra-dashboard/services/frontend/src/main.tsx": {
@@ -105,8 +105,8 @@
     "semantic_hash": ""
   },
   "infra-dashboard/README.md": {
-    "mtime": 1787882151.9941843,
-    "ast_hash": "cdd529d29d41c21bd4c52166a37a0f0e",
+    "mtime": 1788318612.9889636,
+    "ast_hash": "9bd26cb525d30821d101d2f52504683d",
     "semantic_hash": ""
   },
   "infra-dashboard/services/alert-service/requirements.txt": {
@@ -192,6 +192,101 @@
   "infra-dashboard/cce-k8s/all-in-one.yaml": {
     "mtime": 1787885638.5067647,
     "ast_hash": "c3f9061f7eed810c3099e28d14c9ea4d",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/frontend/src/components/AlertCenter.tsx": {
+    "mtime": 1788318419.9610286,
+    "ast_hash": "6bb79e6519ac36bc354c532f073413a3",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/frontend/src/components/FleetOverview.tsx": {
+    "mtime": 1788318409.6585002,
+    "ast_hash": "f36925d81333aa820e16e863f17623aa",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/frontend/src/components/ResourceCard.tsx": {
+    "mtime": 1788318394.489214,
+    "ast_hash": "c4eb1ee0f59d267f73c71986a4cda104",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/mobile/App.tsx": {
+    "mtime": 1788318592.8072665,
+    "ast_hash": "dafac085289e97f28b64bfd336c41b01",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/mobile/app.json": {
+    "mtime": 1788318477.4151554,
+    "ast_hash": "c2e863fe4de2a635a060ffee8ccd564e",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/mobile/index.ts": {
+    "mtime": 1788318485.7122796,
+    "ast_hash": "aca51ec09034e8c4523cc0300f7cc24f",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/mobile/package.json": {
+    "mtime": 1788318472.4205656,
+    "ast_hash": "e41239fd380054eb889c15efb992a37a",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/mobile/src/components/AlertItem.tsx": {
+    "mtime": 1788318528.4053607,
+    "ast_hash": "3368e69432e76f7c8b072379d6b42cf6",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/mobile/src/components/Header.tsx": {
+    "mtime": 1788318508.0495012,
+    "ast_hash": "743820601506b4f74971185a3a5c97ce",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/mobile/src/components/MetricGauge.tsx": {
+    "mtime": 1788318513.7704136,
+    "ast_hash": "c9943fe90c3babce8b3efa430208a995",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/mobile/src/components/MobileResourceCard.tsx": {
+    "mtime": 1788318523.012236,
+    "ast_hash": "381f65b14a73c5c79a2837be176a0bce",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/mobile/src/config/api.ts": {
+    "mtime": 1788318498.000239,
+    "ast_hash": "02613c8f938499d5da5e32778fba8c1f",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/mobile/src/screens/AlertsScreen.tsx": {
+    "mtime": 1788318558.7402637,
+    "ast_hash": "493d15c2cafba18862e831a4bb8127a7",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/mobile/src/screens/CloudAccountsScreen.tsx": {
+    "mtime": 1788318573.04698,
+    "ast_hash": "490eb23497843cbe1977c5be5319c64e",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/mobile/src/screens/DashboardScreen.tsx": {
+    "mtime": 1788318540.1222649,
+    "ast_hash": "5f077d8e07106ba74061f419c6273a25",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/mobile/src/screens/ResourceDetailScreen.tsx": {
+    "mtime": 1788318551.045088,
+    "ast_hash": "bd927731cef4a9fac9701dabdc72912f",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/mobile/src/screens/SettingsScreen.tsx": {
+    "mtime": 1788318582.9927425,
+    "ast_hash": "f48847c5484f26418e7653f01b6b323a",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/mobile/src/types/index.ts": {
+    "mtime": 1788318490.6355205,
+    "ast_hash": "0b3636076c3f6d5a80290945edce24f7",
+    "semantic_hash": ""
+  },
+  "infra-dashboard/services/mobile/tsconfig.json": {
+    "mtime": 1788318481.4131227,
+    "ast_hash": "a5df9ddad82c56de332cbb7d00dd294b",
     "semantic_hash": ""
   }
 }

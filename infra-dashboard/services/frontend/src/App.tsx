@@ -1,5 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import CloudAccountsModal from "./components/CloudAccountsModal";
+import { FleetOverview } from "./components/FleetOverview";
+import { ResourceCard, type ResourceGroup } from "./components/ResourceCard";
+import { AlertCenter, type Alert, type Rule } from "./components/AlertCenter";
 
 const HISTORY_URL = "http://localhost:4000";
 const ALERT_URL = "http://localhost:5000";
@@ -13,38 +16,32 @@ type Resource = {
 type Metric = {
   id: string;
   resourceId: string;
+  resourceType?: string;
+  provider?: string;
   metricName: string;
   value: number;
   unit: string | null;
   timestamp: string;
 };
 
-type Alert = {
-  id: string;
-  resourceId: string;
-  metricName: string;
-  value: number;
-  threshold: number;
-  operator: string;
-  triggeredAt: string;
-};
-
-function formatMetricValue(value: number, unit?: string | null): string {
-  const formattedNum = Number.isInteger(value) ? value.toString() : value.toFixed(2);
-  if (!unit) return formattedNum;
-  if (unit === "percent" || unit === "%") return `${formattedNum}%`;
-  return `${formattedNum} ${unit}`;
-}
-
 function App() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [metrics, setMetrics] = useState<Metric[]>([]);
   const [alerts, setAlerts] = useState<Alert[]>([]);
+  const [rules, setRules] = useState<Rule[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [isAccountsModalOpen, setIsAccountsModalOpen] = useState(false);
+  const [isAlertsCenterOpen, setIsAlertsCenterOpen] = useState(false);
   const [cloudAccountCount, setCloudAccountCount] = useState(0);
 
-  const loadAccountsCount = async () => {
+  // Filters & Controls
+  const [selectedProvider, setSelectedProvider] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [countdown, setCountdown] = useState<number>(5);
+  const [isPolling, setIsPolling] = useState<boolean>(true);
+  const [lastSyncTime, setLastSyncTime] = useState<Date>(new Date());
+
+  const loadAccountsCount = useCallback(async () => {
     try {
       const resp = await fetch(`${HISTORY_URL}/cloud-accounts`);
       if (resp.ok) {
@@ -54,126 +51,280 @@ function App() {
     } catch {
       // ignore
     }
-  };
+  }, []);
 
-  const load = async () => {
+  const load = useCallback(async () => {
     try {
-      const [resResp, metricsResp, alertsResp] = await Promise.all([
+      const [resResp, metricsResp, alertsResp, rulesResp] = await Promise.all([
         fetch(`${HISTORY_URL}/resources`),
-        fetch(`${HISTORY_URL}/metrics?limit=20`),
+        fetch(`${HISTORY_URL}/metrics?limit=100`),
         fetch(`${ALERT_URL}/alerts`),
+        fetch(`${ALERT_URL}/rules`).catch(() => ({ ok: false, json: async () => [] })),
       ]);
-      setResources(await resResp.json());
-      setMetrics(await metricsResp.json());
-      setAlerts(await alertsResp.json());
+
+      if (resResp.ok) setResources(await resResp.json());
+      if (metricsResp.ok) setMetrics(await metricsResp.json());
+      if (alertsResp.ok) setAlerts(await alertsResp.json());
+      if (rulesResp && "ok" in rulesResp && rulesResp.ok) setRules(await rulesResp.json());
+
       setError(null);
-    } catch (err) {
+      setLastSyncTime(new Date());
+    } catch {
       setError(
-        "Couldn't reach history-service / alert-service. Make sure services are running locally (see README)."
+        "Could not reach history-service (port 4000) or alert-service (port 5000). Ensure services are running locally."
       );
     }
-  };
+  }, []);
 
   useEffect(() => {
     load();
     loadAccountsCount();
-    const interval = setInterval(load, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  }, [load, loadAccountsCount]);
+
+  // Polling loop with countdown timer
+  useEffect(() => {
+    if (!isPolling) return;
+
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          load();
+          loadAccountsCount();
+          return 5;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isPolling, load, loadAccountsCount]);
+
+  // Group metrics by Resource ID
+  const groupedResources = useMemo<ResourceGroup[]>(() => {
+    const resourceMap: Record<string, ResourceGroup> = {};
+
+    // First seed with registered resources
+    resources.forEach((r) => {
+      resourceMap[r.resourceId] = {
+        resourceId: r.resourceId,
+        resourceType: r.resourceType || "host",
+        provider: r.provider || "unknown",
+        cpuHistory: [],
+        memoryHistory: [],
+      };
+    });
+
+    // Sort metrics chronologically (oldest to newest) for accurate trend lines
+    const sortedMetrics = [...metrics].sort(
+      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
+
+    // Process metric data points
+    sortedMetrics.forEach((m) => {
+      if (!resourceMap[m.resourceId]) {
+        resourceMap[m.resourceId] = {
+          resourceId: m.resourceId,
+          resourceType: m.resourceType || "host",
+          provider: m.provider || "unknown",
+          cpuHistory: [],
+          memoryHistory: [],
+        };
+      }
+
+      const res = resourceMap[m.resourceId];
+      if (m.provider && res.provider === "unknown") res.provider = m.provider;
+      if (m.resourceType && res.resourceType === "host") res.resourceType = m.resourceType;
+      res.lastUpdated = m.timestamp;
+
+      const timeLabel = new Date(m.timestamp).toLocaleTimeString([], {
+        minute: "2-digit",
+        second: "2-digit",
+      });
+
+      if (m.metricName === "cpu_percent" || m.metricName === "cpu_util") {
+        res.latestCpu = m.value;
+        res.cpuHistory.push({ time: timeLabel, value: m.value });
+        if (res.cpuHistory.length > 20) res.cpuHistory.shift();
+      } else if (m.metricName === "memory_percent" || m.metricName === "mem_util") {
+        res.latestMemory = m.value;
+        res.memoryHistory.push({ time: timeLabel, value: m.value });
+        if (res.memoryHistory.length > 20) res.memoryHistory.shift();
+      } else if (
+        m.metricName === "network_in_bytes" ||
+        m.metricName === "network_incoming_bytes_rate_inband"
+      ) {
+        res.latestNetworkIn = m.value;
+      } else if (
+        m.metricName === "network_out_bytes" ||
+        m.metricName === "network_outgoing_bytes_rate_inband"
+      ) {
+        res.latestNetworkOut = m.value;
+      }
+    });
+
+    // Check for active alerts
+    const activeAlertResourceIds = new Set(alerts.map((a) => a.resourceId));
+    Object.values(resourceMap).forEach((r) => {
+      r.hasActiveAlert = activeAlertResourceIds.has(r.resourceId);
+    });
+
+    return Object.values(resourceMap);
+  }, [resources, metrics, alerts]);
+
+  // Filtered resources
+  const filteredResources = useMemo(() => {
+    return groupedResources.filter((r) => {
+      const matchProvider =
+        selectedProvider === "all" ||
+        r.provider.toLowerCase() === selectedProvider.toLowerCase();
+      const matchQuery =
+        !searchQuery.trim() ||
+        r.resourceId.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.resourceType.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.provider.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchProvider && matchQuery;
+    });
+  }, [groupedResources, selectedProvider, searchQuery]);
+
+  // Fleet aggregate statistics
+  const fleetStats = useMemo(() => {
+    const totalNodes = groupedResources.length;
+    let huaweiCount = 0;
+    let awsCount = 0;
+    let azureCount = 0;
+    let cpuSum = 0;
+    let cpuCount = 0;
+    let memSum = 0;
+    let memCount = 0;
+
+    groupedResources.forEach((r) => {
+      const prov = r.provider.toLowerCase();
+      if (prov === "huawei") huaweiCount++;
+      else if (prov === "aws") awsCount++;
+      else if (prov === "azure") azureCount++;
+
+      if (r.latestCpu !== undefined && !isNaN(r.latestCpu)) {
+        cpuSum += r.latestCpu;
+        cpuCount++;
+      }
+      if (r.latestMemory !== undefined && !isNaN(r.latestMemory)) {
+        memSum += r.latestMemory;
+        memCount++;
+      }
+    });
+
+    return {
+      totalNodes,
+      huaweiCount,
+      awsCount,
+      azureCount,
+      avgCpu: cpuCount > 0 ? cpuSum / cpuCount : 0,
+      avgMemory: memCount > 0 ? memSum / memCount : 0,
+      activeAlertsCount: alerts.length,
+      cloudAccountsCount: cloudAccountCount,
+      lastSyncTime,
+    };
+  }, [groupedResources, alerts.length, cloudAccountCount, lastSyncTime]);
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-8 font-sans">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold">Personal Infra Dashboard</h1>
-            <span
-              className={`text-xs px-2.5 py-0.5 rounded-full font-medium border ${
-                cloudAccountCount > 0
-                  ? "bg-emerald-950/80 text-emerald-300 border-emerald-700"
-                  : "bg-amber-950/80 text-amber-300 border-amber-700"
-              }`}
-            >
-              {cloudAccountCount > 0
-                ? `● ${cloudAccountCount} Cloud Account${cloudAccountCount > 1 ? "s" : ""} Active`
-                : "○ Running in Mock Mode"}
-            </span>
-          </div>
-          <p className="text-slate-400 text-sm mt-1">
-            Monitoring infrastructure metrics, threshold alerts, and cloud resources.
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#070A11] text-slate-100 p-4 sm:p-6 lg:p-8 font-sans">
+      <div className="max-w-7xl mx-auto">
+        {/* Fleet Overview & Command Toolbar */}
+        <FleetOverview
+          stats={fleetStats}
+          selectedProvider={selectedProvider}
+          onSelectProvider={setSelectedProvider}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onOpenAccountsModal={() => setIsAccountsModalOpen(true)}
+          onOpenAlertsCenter={() => setIsAlertsCenterOpen(true)}
+          onManualRefresh={() => {
+            load();
+            loadAccountsCount();
+            setCountdown(5);
+          }}
+          countdown={countdown}
+          isPolling={isPolling}
+          onTogglePolling={() => setIsPolling((p) => !p)}
+        />
 
-        <button
-          onClick={() => setIsAccountsModalOpen(true)}
-          className="self-start md:self-auto flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-medium px-4 py-2 rounded-lg transition shadow-lg shadow-indigo-600/20"
-        >
-          <span>☁️</span> Manage Cloud Accounts
-        </button>
+        {/* Backend Error Alert */}
+        {error && (
+          <div className="bg-amber-950/80 border border-amber-700/80 text-amber-200 px-4 py-3 rounded-xl mb-6 text-xs font-mono flex items-center gap-2">
+            <span>⚠️</span>
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* Resource Telemetry Grid */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-sm font-semibold font-mono text-slate-300 uppercase tracking-wider flex items-center gap-2">
+              <span>Telemetry Feed</span>
+              <span className="text-slate-500 font-normal">
+                ({filteredResources.length} of {groupedResources.length} Nodes Displayed)
+              </span>
+            </h2>
+          </div>
+
+          {filteredResources.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+              {filteredResources.map((res) => (
+                <ResourceCard key={res.resourceId} resource={res} />
+              ))}
+            </div>
+          ) : (
+            <div className="bg-[#0D1322]/60 border border-slate-800/80 rounded-2xl p-12 text-center">
+              <div className="text-3xl mb-3">📡</div>
+              <h3 className="text-base font-semibold text-slate-200 mb-1">
+                {searchQuery || selectedProvider !== "all"
+                  ? "No matching nodes found"
+                  : "No infrastructure nodes reported yet"}
+              </h3>
+              <p className="text-xs text-slate-400 font-mono max-w-md mx-auto mb-5">
+                {searchQuery || selectedProvider !== "all"
+                  ? "Try adjusting your search query or provider filter."
+                  : "Ensure `collector-service` is running to poll Huawei Cloud CES / AWS / Azure or generate synthetic metrics."}
+              </p>
+              <div className="flex justify-center gap-3">
+                {(searchQuery || selectedProvider !== "all") && (
+                  <button
+                    onClick={() => {
+                      setSelectedProvider("all");
+                      setSearchQuery("");
+                    }}
+                    className="text-xs px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium transition"
+                  >
+                    Reset Filters
+                  </button>
+                )}
+                <button
+                  onClick={() => setIsAccountsModalOpen(true)}
+                  className="text-xs px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-medium transition"
+                >
+                  Configure Cloud Accounts
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
+      {/* Cloud Accounts Modal */}
       <CloudAccountsModal
         isOpen={isAccountsModalOpen}
         onClose={() => setIsAccountsModalOpen(false)}
         onAccountsUpdated={loadAccountsCount}
       />
 
-      {error && (
-        <div className="bg-amber-950 border border-amber-700 text-amber-200 px-4 py-3 rounded mb-6 text-sm">
-          {error}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <section className="bg-slate-900 rounded-lg p-4">
-          <h2 className="font-medium mb-3 text-slate-300">Resources</h2>
-          <ul className="space-y-2 text-sm">
-            {resources.map((r) => (
-              <li key={r.resourceId} className="flex justify-between">
-                <span>{r.resourceId}</span>
-                <span className="text-slate-500">{r.provider}</span>
-              </li>
-            ))}
-            {resources.length === 0 && (
-              <li className="text-slate-500">No resources reported yet.</li>
-            )}
-          </ul>
-        </section>
-
-        <section className="bg-slate-900 rounded-lg p-4">
-          <h2 className="font-medium mb-3 text-slate-300">Recent metrics</h2>
-          <ul className="space-y-2 text-sm">
-            {metrics.map((m) => (
-              <li key={m.id} className="flex justify-between">
-                <span>
-                  {m.resourceId} · {m.metricName}
-                </span>
-                <span className="text-slate-400 font-mono">
-                  {formatMetricValue(m.value, m.unit)}
-                </span>
-              </li>
-            ))}
-            {metrics.length === 0 && (
-              <li className="text-slate-500">No metrics yet.</li>
-            )}
-          </ul>
-        </section>
-
-        <section className="bg-slate-900 rounded-lg p-4">
-          <h2 className="font-medium mb-3 text-slate-300">Alerts</h2>
-          <ul className="space-y-2 text-sm">
-            {alerts.map((a) => (
-              <li key={a.id} className="text-amber-300">
-                {a.resourceId}: {a.metricName}={a.value} ({a.operator}{" "}
-                {a.threshold})
-              </li>
-            ))}
-            {alerts.length === 0 && (
-              <li className="text-slate-500">No alerts triggered.</li>
-            )}
-          </ul>
-        </section>
-      </div>
+      {/* Alert & Incident Center Modal */}
+      <AlertCenter
+        isOpen={isAlertsCenterOpen}
+        onClose={() => setIsAlertsCenterOpen(false)}
+        alerts={alerts}
+        rules={rules}
+        onClearAlerts={() => setAlerts([])}
+      />
     </div>
   );
 }
