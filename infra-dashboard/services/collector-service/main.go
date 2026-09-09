@@ -16,7 +16,7 @@ import (
 type Metric = providers.Metric
 type CloudAccount = providers.CloudAccount
 
-func postJSON(url string, payload any) error {
+func postJSON(url string, payload any, apiKey string) error {
 	body, err := json.Marshal(payload)
 	if err != nil {
 		return err
@@ -26,6 +26,9 @@ func postJSON(url string, payload any) error {
 		return err
 	}
 	req.Header.Set("Content-Type", "application/json")
+	if apiKey != "" {
+		req.Header.Set("X-Internal-Service-Key", apiKey)
+	}
 
 	client := &http.Client{Timeout: 5 * time.Second}
 	resp, err := client.Do(req)
@@ -40,9 +43,17 @@ func postJSON(url string, payload any) error {
 	return nil
 }
 
-func fetchCloudAccounts(url string) ([]CloudAccount, error) {
+func fetchCloudAccounts(url string, apiKey string) ([]CloudAccount, error) {
+	req, err := http.NewRequest(http.MethodGet, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	if apiKey != "" {
+		req.Header.Set("X-Internal-Service-Key", apiKey)
+	}
+
 	client := &http.Client{Timeout: 5 * time.Second}
-	resp, err := client.Get(url)
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -71,6 +82,7 @@ func run() {
 	historyURL := baseURL + "/metrics"
 	accountsURL := baseURL + "/internal/cloud-accounts"
 	alertURL := getenv("ALERT_SERVICE_URL", "http://localhost:5000/metrics")
+	internalApiKey := getenv("INTERNAL_API_KEY", "infradashboard-internal-secret-key-change-me")
 
 	intervalSec, err := strconv.Atoi(getenv("POLL_INTERVAL_SECONDS", "10"))
 	if err != nil {
@@ -87,7 +99,7 @@ func run() {
 
 	for {
 		// 1. Fetch configured & active cloud accounts
-		accounts, err := fetchCloudAccounts(accountsURL)
+		accounts, err := fetchCloudAccounts(accountsURL, internalApiKey)
 		var metrics []Metric
 
 		if err != nil {
@@ -121,13 +133,13 @@ func run() {
 
 		if len(metrics) > 0 {
 			// Batch to history-service
-			if err := postJSON(historyURL, metrics); err != nil {
+			if err := postJSON(historyURL, metrics, internalApiKey); err != nil {
 				log.Printf("failed to post batch to history-service: %v", err)
 			}
 
 			// alert-service evaluates one metric at a time
 			for _, m := range metrics {
-				if err := postJSON(alertURL, m); err != nil {
+				if err := postJSON(alertURL, m, internalApiKey); err != nil {
 					log.Printf("failed to post metric to alert-service: %v", err)
 				}
 			}

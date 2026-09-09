@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 
-const HISTORY_URL = "http://localhost:4000";
+const HISTORY_URL = import.meta.env.VITE_HISTORY_URL || "/api/history";
 
 export type CloudAccount = {
   id: string;

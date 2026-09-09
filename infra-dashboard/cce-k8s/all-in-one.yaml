@@ -12,6 +12,7 @@ type: Opaque
 stringData:
   DATABASE_URL: "postgresql://postgres:postgrespassword@postgres-service:5432/infradb?schema=public"
   ENCRYPTION_KEY: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+  INTERNAL_API_KEY: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
 ---
 # -------------------- POSTGRESQL DB (Stateful) --------------------
 apiVersion: apps/v1
@@ -31,7 +32,9 @@ spec:
     spec:
       containers:
         - name: postgres
-          image: postgres:15-alpine
+          image: postgres:16-alpine
+          securityContext:
+            allowPrivilegeEscalation: false
           env:
             - name: POSTGRES_DB
               value: infradb
@@ -48,6 +51,7 @@ metadata:
   name: postgres-service
   namespace: infra-dashboard
 spec:
+  type: ClusterIP
   selector:
     app: postgres
   ports:
@@ -73,11 +77,19 @@ spec:
       containers:
         - name: notifier
           image: <YOUR_DOCKERHUB_USERNAME>/infra-notifier:latest
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: 5050
           env:
             - name: PORT
               value: "5050"
+            - name: INTERNAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: dashboard-secrets
+                  key: INTERNAL_API_KEY
 ---
 apiVersion: v1
 kind: Service
@@ -85,6 +97,7 @@ metadata:
   name: notifier-service
   namespace: infra-dashboard
 spec:
+  type: ClusterIP
   selector:
     app: notifier
   ports:
@@ -110,6 +123,9 @@ spec:
       containers:
         - name: history-service
           image: <YOUR_DOCKERHUB_USERNAME>/infra-history-service:latest
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: 4000
           envFrom:
@@ -125,6 +141,7 @@ metadata:
   name: history-service
   namespace: infra-dashboard
 spec:
+  type: ClusterIP
   selector:
     app: history-service
   ports:
@@ -150,11 +167,19 @@ spec:
       containers:
         - name: alert-service
           image: <YOUR_DOCKERHUB_USERNAME>/infra-alert-service:latest
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: 5000
           env:
             - name: NOTIFIER_URL
               value: "http://notifier-service:5050/notify"
+            - name: INTERNAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: dashboard-secrets
+                  key: INTERNAL_API_KEY
 ---
 apiVersion: v1
 kind: Service
@@ -162,6 +187,7 @@ metadata:
   name: alert-service
   namespace: infra-dashboard
 spec:
+  type: ClusterIP
   selector:
     app: alert-service
   ports:
@@ -187,6 +213,9 @@ spec:
       containers:
         - name: collector-service
           image: <YOUR_DOCKERHUB_USERNAME>/infra-collector-service:latest
+          securityContext:
+            runAsNonRoot: true
+            allowPrivilegeEscalation: false
           env:
             - name: HISTORY_SERVICE_BASE
               value: "http://history-service:4000"
@@ -194,8 +223,13 @@ spec:
               value: "http://alert-service:5000/metrics"
             - name: POLL_INTERVAL_SECONDS
               value: "15"
+            - name: INTERNAL_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: dashboard-secrets
+                  key: INTERNAL_API_KEY
 ---
-# -------------------- FRONTEND (UI) --------------------
+# -------------------- FRONTEND & API GATEWAY (UI) --------------------
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -214,6 +248,8 @@ spec:
       containers:
         - name: frontend
           image: <YOUR_DOCKERHUB_USERNAME>/infra-frontend:latest
+          securityContext:
+            allowPrivilegeEscalation: false
           ports:
             - containerPort: 80
 ---
@@ -223,9 +259,100 @@ metadata:
   name: frontend-service
   namespace: infra-dashboard
 spec:
-  type: LoadBalancer # CCE automatically provisions a public EIP for this service
+  type: LoadBalancer # CCE automatically provisions a public EIP for this sole ingress point
   selector:
     app: frontend
   ports:
     - port: 80
       targetPort: 80
+---
+# -------------------- ZERO-TRUST NETWORK POLICIES (Microsegmentation) --------------------
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: postgres-network-policy
+  namespace: infra-dashboard
+spec:
+  podSelector:
+    matchLabels:
+      app: postgres
+  policyTypes:
+    - Ingress
+  ingress:
+    # Only allow ingress from history-service pod
+    - from:
+        - podSelector:
+            matchLabels:
+              app: history-service
+      ports:
+        - protocol: TCP
+          port: 5432
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: notifier-network-policy
+  namespace: infra-dashboard
+spec:
+  podSelector:
+    matchLabels:
+      app: notifier
+  policyTypes:
+    - Ingress
+  ingress:
+    # Only allow ingress from alert-service pod
+    - from:
+        - podSelector:
+            matchLabels:
+              app: alert-service
+      ports:
+        - protocol: TCP
+          port: 5050
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: history-service-network-policy
+  namespace: infra-dashboard
+spec:
+  podSelector:
+    matchLabels:
+      app: history-service
+  policyTypes:
+    - Ingress
+  ingress:
+    # Only allow ingress from frontend gateway and collector-service
+    - from:
+        - podSelector:
+            matchLabels:
+              app: frontend
+        - podSelector:
+            matchLabels:
+              app: collector-service
+      ports:
+        - protocol: TCP
+          port: 4000
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: alert-service-network-policy
+  namespace: infra-dashboard
+spec:
+  podSelector:
+    matchLabels:
+      app: alert-service
+  policyTypes:
+    - Ingress
+  ingress:
+    # Only allow ingress from frontend gateway and collector-service
+    - from:
+        - podSelector:
+            matchLabels:
+              app: frontend
+        - podSelector:
+            matchLabels:
+              app: collector-service
+      ports:
+        - protocol: TCP
+          port: 5000

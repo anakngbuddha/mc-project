@@ -9,20 +9,18 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 4000;
+const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || "infradashboard-internal-secret-key-change-me";
 
-const MetricInput = z.object({
-  resourceId: z.string(),
-  resourceType: z.string(),
-  provider: z.string(),
-  metricName: z.string(),
-  value: z.number(),
-  unit: z.string().optional(),
-  timestamp: z.string().datetime().optional(),
-});
-
-// Accept either a single metric or a batch — collector-service will
-// usually send a batch per poll cycle.
-const IngestBody = z.union([MetricInput, z.array(MetricInput)]);
+// Zero-Trust: Middleware enforcing service-to-service authentication
+function requireInternalAuth(req: express.Request, res: express.Response, next: express.NextFunction) {
+  const token = req.headers["x-internal-service-key"] || 
+    (req.headers.authorization?.startsWith("Bearer ") ? req.headers.authorization.slice(7) : null);
+  
+  if (!token || token !== INTERNAL_API_KEY) {
+    return res.status(401).json({ error: "Unauthorized: Invalid or missing X-Internal-Service-Key" });
+  }
+  next();
+}
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "history-service" });
@@ -148,8 +146,8 @@ app.delete("/cloud-accounts/:id", async (req, res) => {
   }
 });
 
-// Internal endpoint for collector-service (decrypted)
-app.get("/internal/cloud-accounts", async (_req, res) => {
+// Internal endpoint for collector-service (decrypted with Zero-Trust internal auth)
+app.get("/internal/cloud-accounts", requireInternalAuth, async (_req, res) => {
   try {
     const accounts = await prisma.cloudAccount.findMany({
       where: { enabled: true },
@@ -181,9 +179,20 @@ app.get("/internal/cloud-accounts", async (_req, res) => {
 
 // --- Metrics Endpoints -----------------------------------------------
 
-// Ingest metrics. Called by collector-service directly over HTTP for now
-// (no message broker in this local-only phase).
-app.post("/metrics", async (req, res) => {
+const MetricInput = z.object({
+  resourceId: z.string(),
+  resourceType: z.string(),
+  provider: z.string(),
+  metricName: z.string(),
+  value: z.number(),
+  unit: z.string().optional(),
+  timestamp: z.string().datetime().optional(),
+});
+
+const IngestBody = z.union([MetricInput, z.array(MetricInput)]);
+
+// Ingest metrics with internal service authentication
+app.post("/metrics", requireInternalAuth, async (req, res) => {
   const parsed = IngestBody.safeParse(req.body);
   if (!parsed.success) {
     return res.status(400).json({ error: parsed.error.flatten() });

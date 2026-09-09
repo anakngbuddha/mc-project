@@ -14,11 +14,17 @@ from datetime import datetime, timezone
 from typing import Literal
 
 import httpx
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Header, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 app = FastAPI(title="alert-service")
+
+INTERNAL_API_KEY = os.environ.get("INTERNAL_API_KEY", "infradashboard-internal-secret-key-change-me")
+
+def verify_internal_token(x_internal_service_key: str | None = Header(None)):
+    if not x_internal_service_key or x_internal_service_key != INTERNAL_API_KEY:
+        raise HTTPException(status_code=401, detail="Unauthorized: Invalid or missing X-Internal-Service-Key")
 
 app.add_middleware(
     CORSMiddleware,
@@ -138,11 +144,11 @@ def list_alerts():
 
 
 @app.post("/metrics", status_code=202)
-async def receive_metric(metric: MetricInput):
+async def receive_metric(metric: MetricInput, _auth: None = Depends(verify_internal_token)):
     """
     Called by collector-service alongside history-service — same metric
     payload goes to both. Evaluates all rules; fires notifier for each
-    breach.
+    breach. Protected by Zero-Trust internal service authentication.
     """
     triggered = []
     for rule in rules:
@@ -172,6 +178,7 @@ async def receive_metric(metric: MetricInput):
                             ),
                             "severity": "warning",
                         },
+                        headers={"X-Internal-Service-Key": INTERNAL_API_KEY},
                         timeout=5.0,
                     )
                 except httpx.HTTPError as exc:

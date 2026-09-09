@@ -7,7 +7,10 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o /app/collector .
 
 FROM alpine:3.19 AS runner
 WORKDIR /app
-RUN apk --no-cache add ca-certificates tzdata
-COPY --from=builder /app/collector /app/collector
+RUN apk --no-cache add ca-certificates tzdata && \
+    addgroup -S appgroup -g 10001 && \
+    adduser -S appuser -u 10001 -G appgroup
+COPY --from=builder --chown=appuser:appgroup /app/collector /app/collector
 
+USER 10001:10001
 CMD ["/app/collector"]

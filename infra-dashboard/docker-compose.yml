@@ -3,12 +3,15 @@ services:
     image: postgres:16-alpine
     container_name: postgres-service
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     environment:
       POSTGRES_DB: infradb
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgrespassword
-    ports:
-      - "5432:5432"
+    # Zero-Trust: Internal network only, no host port exposure
+    expose:
+      - "5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     networks:
@@ -18,10 +21,14 @@ services:
     image: markvalerio4992/notifier-service:v1
     container_name: notifier-service
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     environment:
       PORT: "5050"
-    ports:
-      - "5050:5050"
+      INTERNAL_API_KEY: "${INTERNAL_API_KEY:-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855}"
+    # Zero-Trust: Internal network only, no host port exposure
+    expose:
+      - "5050"
     networks:
       - infra-network
 
@@ -29,14 +36,18 @@ services:
     image: markvalerio4992/history-service:v1
     container_name: history-service
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       - postgres
     environment:
       PORT: "4000"
-      DATABASE_URL: "postgresql://postgres:postgrespassword@postgres:5432/infradb?schema=public"
-      ENCRYPTION_KEY: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    ports:
-      - "4000:4000"
+      DATABASE_URL: "postgresql://postgres:postgrespassword@postgres-service:5432/infradb?schema=public"
+      ENCRYPTION_KEY: "${ENCRYPTION_KEY:-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855}"
+      INTERNAL_API_KEY: "${INTERNAL_API_KEY:-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855}"
+    # Zero-Trust: Internal network only, no host port exposure
+    expose:
+      - "4000"
     networks:
       - infra-network
 
@@ -44,12 +55,16 @@ services:
     image: markvalerio4992/alert-service:v1
     container_name: alert-service
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       - notifier
     environment:
-      NOTIFIER_URL: "http://notifier:5050/notify"
-    ports:
-      - "5000:5000"
+      NOTIFIER_URL: "http://notifier-service:5050/notify"
+      INTERNAL_API_KEY: "${INTERNAL_API_KEY:-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855}"
+    # Zero-Trust: Internal network only, no host port exposure
+    expose:
+      - "5000"
     networks:
       - infra-network
 
@@ -57,6 +72,8 @@ services:
     image: markvalerio4992/collector-service:v1
     container_name: collector-service
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       - history-service
       - alert-service
@@ -64,6 +81,7 @@ services:
       HISTORY_SERVICE_BASE: "http://history-service:4000"
       ALERT_SERVICE_URL: "http://alert-service:5000/metrics"
       POLL_INTERVAL_SECONDS: "15"
+      INTERNAL_API_KEY: "${INTERNAL_API_KEY:-e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855}"
     networks:
       - infra-network
 
@@ -71,9 +89,12 @@ services:
     image: markvalerio4992/frontend-service:v1
     container_name: frontend-service
     restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
     depends_on:
       - history-service
       - alert-service
+    # Zero-Trust API Gateway: Sole public entry point
     ports:
       - "80:80"
     networks:

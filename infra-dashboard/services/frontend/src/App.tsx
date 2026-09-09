@@ -4,8 +4,8 @@ import { FleetOverview } from "./components/FleetOverview";
 import { ResourceCard, type ResourceGroup } from "./components/ResourceCard";
 import { AlertCenter, type Alert, type Rule } from "./components/AlertCenter";
 
-const HISTORY_URL = "http://localhost:4000";
-const ALERT_URL = "http://localhost:5000";
+const HISTORY_URL = import.meta.env.VITE_HISTORY_URL || "/api/history";
+const ALERT_URL = import.meta.env.VITE_ALERT_URL || "/api/alerts";
 
 type Resource = {
   resourceId: string;

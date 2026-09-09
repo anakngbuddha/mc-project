@@ -7,12 +7,20 @@ app.use(express.json());
 
 const PORT = process.env.PORT ? Number(process.env.PORT) : 5050;
 const SLACK_WEBHOOK_URL = process.env.SLACK_WEBHOOK_URL;
+const INTERNAL_API_KEY = process.env.INTERNAL_API_KEY || "infradashboard-internal-secret-key-change-me";
 
 app.get("/health", (_req, res) => {
   res.json({ status: "ok", service: "notifier" });
 });
 
 app.post("/notify", async (req, res) => {
+  const token = req.headers["x-internal-service-key"] || 
+    (req.headers.authorization?.startsWith("Bearer ") ? req.headers.authorization.slice(7) : null);
+  
+  if (!token || token !== INTERNAL_API_KEY) {
+    return res.status(401).json({ error: "Unauthorized: Invalid or missing X-Internal-Service-Key" });
+  }
+
   const { title, message, severity } = req.body ?? {};
 
   if (!message) {
