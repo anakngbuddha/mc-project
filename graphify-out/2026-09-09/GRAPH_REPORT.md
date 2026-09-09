@@ -1,11 +1,11 @@
-# Graph Report - mc-project  (2026-09-09)
+# Graph Report - mc-project  (2026-09-02)
 
 ## Corpus Check
-- 53 files · ~78,319 words
+- 52 files · ~19,854 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 478 nodes · 586 edges · 32 communities (27 shown, 5 thin omitted)
+- 463 nodes · 569 edges · 32 communities (27 shown, 5 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 8 edges (avg confidence: 0.8)
 - Token cost: 0 input · 0 output
 
@@ -13,6 +13,7 @@
 - compilerOptions
 - devDependencies
 - compilerOptions
+- package.json
 - package.json
 - App.tsx
 - main.py
@@ -40,8 +41,8 @@
 
 ## God Nodes (most connected - your core abstractions)
 1. `compilerOptions` - 18 edges
-2. `react` - 17 edges
-3. `compilerOptions` - 15 edges
+2. `compilerOptions` - 15 edges
+3. `react` - 14 edges
 4. `hwSign()` - 11 edges
 5. `expo` - 11 edges
 6. `compilerOptions` - 10 edges
@@ -72,8 +73,8 @@ Cohesion: 0.08
 Nodes (23): compilerOptions, allowArbitraryExtensions, allowImportingTsExtensions, erasableSyntaxOnly, jsx, lib, module, moduleDetection (+15 more)
 
 ### Community 1 - "devDependencies"
-Cohesion: 0.05
-Nodes (39): autoprefixer, dependencies, lucide-react, react, react-dom, recharts, devDependencies, autoprefixer (+31 more)
+Cohesion: 0.10
+Nodes (21): autoprefixer, devDependencies, autoprefixer, oxlint, postcss, tailwindcss, @types/node, @types/react (+13 more)
 
 ### Community 2 - "compilerOptions"
 Cohesion: 0.10
@@ -82,6 +83,10 @@ Nodes (19): compilerOptions, allowImportingTsExtensions, erasableSyntaxOnly, lib
 ### Community 3 - "package.json"
 Cohesion: 0.06
 Nodes (32): dependencies, cors, express, @prisma/client, zod, devDependencies, prisma, tsx (+24 more)
+
+### Community 4 - "package.json"
+Cohesion: 0.11
+Nodes (18): dependencies, lucide-react, react, react-dom, recharts, react, name, private (+10 more)
 
 ### Community 5 - "App.tsx"
 Cohesion: 0.10
@@ -96,7 +101,7 @@ Cohesion: 0.08
 Nodes (24): dependencies, cors, express, devDependencies, tsx, @types/cors, @types/express, @types/node (+16 more)
 
 ### Community 8 - "devDependencies"
-Cohesion: 0.07
+Cohesion: 0.06
 Nodes (54): App(), styles, Tab, AlertItem(), formatOperator(), Props, styles, Header() (+46 more)
 
 ### Community 9 - "compilerOptions"
@@ -136,16 +141,16 @@ Cohesion: 0.31
 Nodes (11): canonicalURI(), escapeRFC3986(), getHeader(), hexSHA256(), hmacSHA256(), hwSign(), TestCanonicalURI(), TestHWSign() (+3 more)
 
 ### Community 26 - "dependencies"
-Cohesion: 0.07
-Nodes (27): expo, expo-asset, expo-haptics, @expo/metro-runtime, expo-status-bar, dependencies, expo, expo-asset (+19 more)
+Cohesion: 0.10
+Nodes (21): expo, expo-haptics, expo-status-bar, dependencies, expo, expo-haptics, expo-status-bar, lucide-react-native (+13 more)
 
 ### Community 27 - "package.json"
-Cohesion: 0.09
-Nodes (22): @babel/core, babel-preset-expo, @expo/ngrok, devDependencies, @babel/core, babel-preset-expo, @expo/ngrok, @types/react (+14 more)
+Cohesion: 0.11
+Nodes (17): @babel/core, devDependencies, @babel/core, @types/react, typescript, @types/react, typescript, main (+9 more)
 
 ### Community 28 - "expo"
-Cohesion: 0.10
-Nodes (19): backgroundColor, foregroundImage, adaptiveIcon, expo, android, icon, ios, name (+11 more)
+Cohesion: 0.12
+Nodes (16): backgroundColor, adaptiveIcon, expo, android, icon, ios, name, orientation (+8 more)
 
 ### Community 29 - "plugins"
 Cohesion: 0.22
@@ -156,7 +161,7 @@ Cohesion: 0.40
 Nodes (4): compilerOptions, strict, extends, expo/tsconfig.base
 
 ## Knowledge Gaps
-- **233 isolated node(s):** `build-and-push.sh script`, `collector-service`, `cesResponse`, `Metric`, `CloudAccount` (+228 more)
+- **224 isolated node(s):** `build-and-push.sh script`, `collector-service`, `cesResponse`, `Metric`, `CloudAccount` (+219 more)
   These have ≤1 connection - possible missing edges or undocumented components.
 - **5 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
@@ -165,15 +170,15 @@ _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `react` connect `devDependencies` to `App.tsx`, `plugins`?**
   _High betweenness centrality (0.027) - this node is a cross-community bridge._
-- **Why does `dependencies` connect `dependencies` to `package.json`?**
-  _High betweenness centrality (0.008) - this node is a cross-community bridge._
 - **Why does `plugins` connect `plugins` to `devDependencies`?**
   _High betweenness centrality (0.007) - this node is a cross-community bridge._
+- **Why does `devDependencies` connect `devDependencies` to `package.json`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `hwSign()` (e.g. with `fetchCESMetrics()` and `listECSServers()`) actually correct?**
   _`hwSign()` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `build-and-push.sh script`, `collector-service`, `cesResponse` to the rest of the system?**
-  _233 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _224 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `compilerOptions` be split into smaller, more focused modules?**
   _Cohesion score 0.08333333333333333 - nodes in this community are weakly interconnected._
 - **Should `devDependencies` be split into smaller, more focused modules?**
-  _Cohesion score 0.05 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.09523809523809523 - nodes in this community are weakly interconnected._

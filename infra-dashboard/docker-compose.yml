@@ -1,0 +1,87 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-service
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: infradb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - infra-network
+
+  notifier:
+    image: markvalerio4992/notifier-service:v1
+    container_name: notifier-service
+    restart: unless-stopped
+    environment:
+      PORT: "5050"
+    ports:
+      - "5050:5050"
+    networks:
+      - infra-network
+
+  history-service:
+    image: markvalerio4992/history-service:v1
+    container_name: history-service
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      PORT: "4000"
+      DATABASE_URL: "postgresql://postgres:postgrespassword@postgres:5432/infradb?schema=public"
+      ENCRYPTION_KEY: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    ports:
+      - "4000:4000"
+    networks:
+      - infra-network
+
+  alert-service:
+    image: markvalerio4992/alert-service:v1
+    container_name: alert-service
+    restart: unless-stopped
+    depends_on:
+      - notifier
+    environment:
+      NOTIFIER_URL: "http://notifier:5050/notify"
+    ports:
+      - "5000:5000"
+    networks:
+      - infra-network
+
+  collector-service:
+    image: markvalerio4992/collector-service:v1
+    container_name: collector-service
+    restart: unless-stopped
+    depends_on:
+      - history-service
+      - alert-service
+    environment:
+      HISTORY_SERVICE_BASE: "http://history-service:4000"
+      ALERT_SERVICE_URL: "http://alert-service:5000/metrics"
+      POLL_INTERVAL_SECONDS: "15"
+    networks:
+      - infra-network
+
+  frontend:
+    image: markvalerio4992/frontend-service:v1
+    container_name: frontend-service
+    restart: unless-stopped
+    depends_on:
+      - history-service
+      - alert-service
+    ports:
+      - "80:80"
+    networks:
+      - infra-network
+
+networks:
+  infra-network:
+    driver: bridge
+
+volumes:
+  postgres_data:

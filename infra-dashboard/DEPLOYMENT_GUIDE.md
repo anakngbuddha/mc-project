@@ -115,6 +115,167 @@ chmod +x build-and-push.sh
 
 ---
 
+## Step 2.5: Run the Full Stack Containerized on the Azure VM (Docker Compose)
+
+Before deploying to Huawei Cloud CCE, you can run and test all microservices locally on your Azure VM using Docker Compose.
+
+### 2.5.1 Configure Azure Network Security Group (NSG) Inbound Rules
+In the **Azure Portal** → **Virtual Machines** → Your VM → **Networking** (or Network Security Group), ensure the following inbound ports are allowed:
+| Priority | Name | Port | Protocol | Source | Purpose |
+|---|---|---|---|---|---|
+| 1000 | Allow-SSH | `22` | TCP | Any / Your IP | Remote Access |
+| 1010 | Allow-HTTP-Frontend | `80` | TCP | Any | Dashboard Web UI |
+| 1020 | Allow-History-API | `4000` | TCP | Any | History API Endpoint |
+| 1030 | Allow-Alert-API | `5000` | TCP | Any | Alert Service Endpoint |
+
+### 2.5.2 Verify or Create `docker-compose.yml`
+Make sure `docker-compose.yml` exists in `infra-dashboard/`:
+```yaml
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: postgres-service
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: infradb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgrespassword
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - infra-network
+
+  notifier:
+    image: markvalerio4992/notifier-service:v1
+    container_name: notifier-service
+    restart: unless-stopped
+    environment:
+      PORT: "5050"
+    ports:
+      - "5050:5050"
+    networks:
+      - infra-network
+
+  history-service:
+    image: markvalerio4992/history-service:v1
+    container_name: history-service
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    environment:
+      PORT: "4000"
+      DATABASE_URL: "postgresql://postgres:postgrespassword@postgres:5432/infradb?schema=public"
+      ENCRYPTION_KEY: "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    ports:
+      - "4000:4000"
+    networks:
+      - infra-network
+
+  alert-service:
+    image: markvalerio4992/alert-service:v1
+    container_name: alert-service
+    restart: unless-stopped
+    depends_on:
+      - notifier
+    environment:
+      NOTIFIER_URL: "http://notifier:5050/notify"
+    ports:
+      - "5000:5000"
+    networks:
+      - infra-network
+
+  collector-service:
+    image: markvalerio4992/collector-service:v1
+    container_name: collector-service
+    restart: unless-stopped
+    depends_on:
+      - history-service
+      - alert-service
+    environment:
+      HISTORY_SERVICE_BASE: "http://history-service:4000"
+      ALERT_SERVICE_URL: "http://alert-service:5000/metrics"
+      POLL_INTERVAL_SECONDS: "15"
+    networks:
+      - infra-network
+
+  frontend:
+    image: markvalerio4992/frontend-service:v1
+    container_name: frontend-service
+    restart: unless-stopped
+    depends_on:
+      - history-service
+      - alert-service
+    ports:
+      - "80:80"
+    networks:
+      - infra-network
+
+networks:
+  infra-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+```
+
+### 2.5.3 Launch the Containers
+Navigate to the `infra-dashboard` directory on the VM and start the services:
+```bash
+cd ~/mc-project/infra-dashboard
+docker compose up -d
+```
+
+### 2.5.4 Verify Container Health & Status
+Check that all 6 containers are running:
+```bash
+docker compose ps
+```
+
+Verify service logs:
+```bash
+# View all logs in real-time
+docker compose logs -f
+
+# Or check individual service logs
+docker compose logs -f history-service
+docker compose logs -f collector-service
+docker compose logs -f alert-service
+```
+
+### 2.5.5 Test Endpoints from VM CLI
+```bash
+# 1. History service health check
+curl http://localhost:4000/health
+
+# 2. Alert service docs/health
+curl -I http://localhost:5000/docs
+
+# 3. Frontend service
+curl -I http://localhost:80
+```
+
+### 2.5.6 Access from your Web Browser
+Open your browser and navigate to:
+```
+http://<AZURE_VM_PUBLIC_IP>
+```
+
+### 2.5.7 Stopping / Managing the Azure VM Containers
+```bash
+# Stop all containers
+docker compose down
+
+# Restart a specific container
+docker compose restart history-service
+
+# Stop and wipe database volume if needed
+docker compose down -v
+```
+
+---
+
 ## Step 3: Set Up Huawei Cloud CCE Cluster
 
 ### 3.1 Create a VPC and Subnet

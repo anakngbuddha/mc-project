@@ -215,8 +215,8 @@
     "semantic_hash": ""
   },
   "infra-dashboard/services/mobile/app.json": {
-    "mtime": 1788333016.6766434,
-    "ast_hash": "077e385dcaad8733a3d09d328c1b57b3",
+    "mtime": 1788318477.4151554,
+    "ast_hash": "c2e863fe4de2a635a060ffee8ccd564e",
     "semantic_hash": ""
   },
   "infra-dashboard/services/mobile/index.ts": {
@@ -225,8 +225,8 @@
     "semantic_hash": ""
   },
   "infra-dashboard/services/mobile/package.json": {
-    "mtime": 1788337698.4082906,
-    "ast_hash": "27372089f21d4e5873ce71d74ef5446a",
+    "mtime": 1788318472.4205656,
+    "ast_hash": "e41239fd380054eb889c15efb992a37a",
     "semantic_hash": ""
   },
   "infra-dashboard/services/mobile/src/components/AlertItem.tsx": {
@@ -235,13 +235,13 @@
     "semantic_hash": ""
   },
   "infra-dashboard/services/mobile/src/components/Header.tsx": {
-    "mtime": 1788332318.9430118,
-    "ast_hash": "0de0a6d062a6312446948b6f9e96fa10",
+    "mtime": 1788318508.0495012,
+    "ast_hash": "743820601506b4f74971185a3a5c97ce",
     "semantic_hash": ""
   },
   "infra-dashboard/services/mobile/src/components/MetricGauge.tsx": {
-    "mtime": 1788332310.2686265,
-    "ast_hash": "85397438123017b2ec2950dd1ebbc4fd",
+    "mtime": 1788318513.7704136,
+    "ast_hash": "c9943fe90c3babce8b3efa430208a995",
     "semantic_hash": ""
   },
   "infra-dashboard/services/mobile/src/components/MobileResourceCard.tsx": {
@@ -250,23 +250,23 @@
     "semantic_hash": ""
   },
   "infra-dashboard/services/mobile/src/config/api.ts": {
-    "mtime": 1788332365.949543,
-    "ast_hash": "4086510e19e5619a10a811f983c29966",
+    "mtime": 1788318498.000239,
+    "ast_hash": "02613c8f938499d5da5e32778fba8c1f",
     "semantic_hash": ""
   },
   "infra-dashboard/services/mobile/src/screens/AlertsScreen.tsx": {
-    "mtime": 1788332333.1970325,
-    "ast_hash": "c4def6b4f765a33313d821207a305151",
+    "mtime": 1788318558.7402637,
+    "ast_hash": "493d15c2cafba18862e831a4bb8127a7",
     "semantic_hash": ""
   },
   "infra-dashboard/services/mobile/src/screens/CloudAccountsScreen.tsx": {
-    "mtime": 1788332348.8862824,
-    "ast_hash": "64c8f20969cc245b4fd8768a4799d45f",
+    "mtime": 1788318573.04698,
+    "ast_hash": "490eb23497843cbe1977c5be5319c64e",
     "semantic_hash": ""
   },
   "infra-dashboard/services/mobile/src/screens/DashboardScreen.tsx": {
-    "mtime": 1788332326.1658452,
-    "ast_hash": "5303e129f7760af6a8eeface7f0895bb",
+    "mtime": 1788318540.1222649,
+    "ast_hash": "5f077d8e07106ba74061f419c6273a25",
     "semantic_hash": ""
   },
   "infra-dashboard/services/mobile/src/screens/ResourceDetailScreen.tsx": {
@@ -275,8 +275,8 @@
     "semantic_hash": ""
   },
   "infra-dashboard/services/mobile/src/screens/SettingsScreen.tsx": {
-    "mtime": 1788332341.7598038,
-    "ast_hash": "367d3852dae416627c324e98434c4094",
+    "mtime": 1788318582.9927425,
+    "ast_hash": "f48847c5484f26418e7653f01b6b323a",
     "semantic_hash": ""
   },
   "infra-dashboard/services/mobile/src/types/index.ts": {
@@ -287,31 +287,6 @@
   "infra-dashboard/services/mobile/tsconfig.json": {
     "mtime": 1788318481.4131227,
     "ast_hash": "a5df9ddad82c56de332cbb7d00dd294b",
-    "semantic_hash": ""
-  },
-  "infra-dashboard/services/mobile/babel.config.js": {
-    "mtime": 1788333052.65663,
-    "ast_hash": "8fc7a520543679a79421ba4e2dbcfe90",
-    "semantic_hash": ""
-  },
-  "infra-dashboard/services/mobile/assets/adaptive-icon.png": {
-    "mtime": 1788332989.3079743,
-    "ast_hash": "cb9d486918078fb3d8478d92182e2c9b",
-    "semantic_hash": ""
-  },
-  "infra-dashboard/services/mobile/assets/favicon.png": {
-    "mtime": 1788332989.3079743,
-    "ast_hash": "cb9d486918078fb3d8478d92182e2c9b",
-    "semantic_hash": ""
-  },
-  "infra-dashboard/services/mobile/assets/icon.png": {
-    "mtime": 1788332989.3079743,
-    "ast_hash": "cb9d486918078fb3d8478d92182e2c9b",
-    "semantic_hash": ""
-  },
-  "infra-dashboard/services/mobile/assets/splash-icon.png": {
-    "mtime": 1788332989.3079743,
-    "ast_hash": "cb9d486918078fb3d8478d92182e2c9b",
     "semantic_hash": ""
   }
 }
